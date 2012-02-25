@@ -41,7 +41,7 @@ class ProductTest < ActiveSupport::TestCase
                 description: "yyy",
                 price: 1,
                 image_url: image_url)
-    end
+  end
     
   test "image url" do
     ok = %w{fred.gif fred.jpg fred.png FRED.JPG FRED.Jpg http://a.b.c/x/y/z/fred.gif}
@@ -58,12 +58,26 @@ class ProductTest < ActiveSupport::TestCase
   end
   
   test "product is not valid without a unique title" do
-    product = Product.new(title: product(:ruby).title,
+    product = Product.new(title: products(:ruby).title,
                           description: "yyy",
                           price: 1, 
                           image_url: "fred.gif")
     assert !product.save
     assert_equal "has already been taken", product.errors[:title].join('; ')
+  end
+  
+  test "product title must be at least 10 characters" do
+    product = Product.new(:title => "blah",
+                          :description => "yyy",
+                          :price => 1,
+                          :image_url => "fred.gif")
+
+    assert product.invalid?
+    assert_equal I18n.translate('errors.messages.too_short', 
+                                :count => 10), product.errors[:title].join('; ')
+
+    product.title = "This is longer than 10 characters" 
+    assert product.valid?
   end
   
 end
